@@ -1,4 +1,5 @@
-This program will be able to extract all of the job information directly from word documents in a folder, by going through each files, and append the information into structured dataset. In addition, it will enable the user to parse any job descriptions by sub headers, as long as those subheaders to be parsed are specified.
+## Overview
+This program will be able to extract all of the job information directly from word documents in a folder, by going through each files, and append the information into structured dataset. In addition, it will enable the user to parse any job descriptions by sub headers, as long as those subheaders to be parsed are specified. 
 
 ## Module Import
 * pandas: This module is a very useful data science module for dealing with dataframes. I used this module to build a dataframe to store all raw text extracted from a document.
@@ -14,9 +15,16 @@ import textract #For extracting raw text from word document.
 #### Description: 
 This function was built to extract text information from each word documents stored within a single local folder as raw text, and return a data frame of raw text data with its corresponding unique document identification.
 #### Parameters: 
-@indir: The input folder directory where all word documents (job descriptions) are located.
-#### Algorithm:
-
+`indir`: The input folder directory where all job descriptions in `.docx` format are located.
+#### Procedures:
+1. First step is to initialize an empty dataframe with two columns `Doc_ID` and `Text`.
+2. Initialize counter by setting it as zero. The counter will keep track of how many word documents have been extracted and also work to assign a unique identification for each raw text that is extracted.
+3. Using `glob` method and for-loop, iterate all of the document paths. For every iteration, perform the following.
+    1. Use `texttract.process()` method to extract document content as raw text.
+    2. Append the raw text into `Text` column and append the counter to the `DOC_ID` column in the dataframe.
+    3. Add one to the current counter.
+4. Return a resulting dataframe.
+#### Code: 
 ```python
 def DocToCorpus(indir):
     # =============================================================================
@@ -40,9 +48,29 @@ def DocToCorpus(indir):
     print('Total of ' + str(count) + ' documents extracted.')
     return corpus
 ```
-## Function - Text Parsing
-```python
+Here is the quick overview of what above step does in a diagram.
+![Text Extraction](https://github.com/takucnoel-endo/Images/blob/main/Screen%20Shot%202022-04-14%20at%201.17.22%20PM.png)
 
+
+
+## Function - Text Parsing
+#### Description: 
+This function was built to parse the extracted raw text into subcategories, consisting of columns as its sub headers and its content as values.
+#### Parameters: 
+* `text`: The raw text to parse.
+* `parser`: User defined list of subheaders within the job description to parse the raw text.
+#### Procedures:
+1. Use `text.split()` method to split by two new line indicators, which will return a list of all lines within a document. By the structure of the document, every subheaders are on its own line, followed by its content on after two new line indicators. Assign the result to `text_split` variable.
+2. Initialize an empty python dictionary `parse_dict` to store parsed contents and their associated subheaders. 
+3. Initialize an empty list called `sub_order` to store the order of subheders within a document. This list is nessesary, because not all documents have the same order of subheaders.
+4. Use for-loop to iterate elements in `text_split` (all lines in the document) and do the following.
+    1. If the current line is included in the user defined list of subheaders, then add the string into `sub_order`.
+5. Use for-loop to iterate elements in `text_split` again and do the following.
+    1. Use another for-loop to iterate on the length (number of elements) in the `sub_order` and do the following.
+        1. 
+
+#### Code: 
+```python
 def ParseDesc(text, parser):
     # =============================================================================
     #Function: Transforms a job description in text value into a dictionary, by parsing
@@ -56,16 +84,16 @@ def ParseDesc(text, parser):
     text_split = text.split('\\n\\n')
     #Initialize a document level dictionary of subtitles and contents.
     parse_dict={}
+    #Initialize a list to store order of subtitles for each of the document.
+    subt_order = []
+    #Iterate on every line in text_split list to create a ordered list of subtitles.
+    for line in text_split:
+    #Code to check whether line in text_split is in parse_list
+        if line.lower().replace(' ', '') in parse_list:
+            #Store the order of subtitles for that specific document.
+            subt_order.append(line)
     #For loop to iterate on every single line within a document.
     for line in text_split:
-        #Initialize a list to store order of subtitles for each of the document.
-        subt_order = []
-        #Iterate on every line in text_split list to create a ordered list of subtitles.
-        for line in text_split:
-            #Code to check whether line in text_split is in parse_list
-            if line.lower().replace(' ', '') in parse_list:
-                #Store the order of subtitles for that specific document.
-                subt_order.append(line)
         #From now, use the ordered subtitles to ...
         #For every two consecutive subtitles in the ordered list, find the index of line where line mathces
         #the two list element, and return lines where its indexes are between indexes of two consecutive subtitles.
@@ -87,7 +115,7 @@ def ParseDesc(text, parser):
 ## Main Procedures
 ```python
 #Access each files in directory and create a corpus.
-corpus=DocToCorpus(indir='C:\\Users\\taku0\\OneDrive\\Documents\\SP 2022\\Consulting\\Files\\Files and Job Descriptions for BAT4301 Skills Inventory Project/*.docx')
+corpus=DocToCorpus(indir='[input directory]/*.docx')
 #Create a list of subtitles to match within a text values.
 parse_list = ['position', 'department', 'paygrade', 'jobcode', 'classification', 'jobfamily', 'repordaytsto', 'prepareddate',
               'jobduties', 'additionalduties','experience', '\\t\\tsummary', 'education', 'numberofdirectreports',
@@ -111,7 +139,7 @@ for dictionary in doc_list:
 
 
 #Set output directory
-outdir = 'C:\\Users\\taku0\\OneDrive\\Documents\\SP 2022\\Consulting\\Files\\Data\\Parse_data.xlsx'
+outdir = '[output directory]/Parse_data.xlsx'
 #Export dataset to indicated directory
 data.to_excel(outdir, index = False)
 ```
