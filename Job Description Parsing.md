@@ -20,10 +20,15 @@ This function was built to extract text information from each word documents sto
 1. First step is to initialize an empty dataframe with two columns `Doc_ID` and `Text`.
 2. Initialize counter by setting it as zero. The counter will keep track of how many word documents have been extracted and also work to assign a unique identification for each raw text that is extracted.
 3. Using `glob` method and for-loop, iterate all of the document paths. For every iteration, perform the following.
-    1. Use `texttract.process()` method to extract document content as raw text.
-    2. Append the raw text into `Text` column and append the counter to the `DOC_ID` column in the dataframe.
-    3. Add one to the current counter.
+    * Use `texttract.process()` method to extract document content as raw text.
+    * Append the raw text into `Text` column and append the counter to the `DOC_ID` column in the dataframe.
+    * Add one to the current counter.
 4. Return a resulting dataframe.
+
+#### Result: 
+Here is the quick overview of what above step does in a diagram.
+![Text Extraction](https://github.com/takucnoel-endo/Images/blob/main/Screen%20Shot%202022-04-14%20at%201.17.22%20PM.png)
+
 #### Code: 
 ```python
 def DocToCorpus(indir):
@@ -48,8 +53,6 @@ def DocToCorpus(indir):
     print('Total of ' + str(count) + ' documents extracted.')
     return corpus
 ```
-Here is the quick overview of what above step does in a diagram.
-![Text Extraction](https://github.com/takucnoel-endo/Images/blob/main/Screen%20Shot%202022-04-14%20at%201.17.22%20PM.png)
 
 
 
@@ -64,10 +67,17 @@ This function was built to parse the extracted raw text into subcategories, cons
 2. Initialize an empty python dictionary `parse_dict` to store parsed contents and their associated subheaders. 
 3. Initialize an empty list called `sub_order` to store the order of subheders within a document. This list is nessesary, because not all documents have the same order of subheaders.
 4. Use for-loop to iterate elements in `text_split` (all lines in the document) and do the following.
-    1. If the current line is included in the user defined list of subheaders, then add the string into `sub_order`.
+    * If the current line is included in the user defined list of subheaders, then add the line into `sub_order`.
 5. Use for-loop to iterate elements in `text_split` again and do the following.
-    1. Use another for-loop to iterate on the length (number of elements) in the `sub_order` and do the following.
-        1. 
+    * Use another for-loop to iterate on from 0 to length of the `sub_order`(number of elements) and do the following. (This will defined `iterstart` variable which is current index of subheader that is needed to be extracted.)
+        * Add one to `iterstart` and assign to `iterend` [Note: `iterend` variable is index number of next subheader after the current subheader. Defining `iterend` will allow for program to identify where the break between a content and the next subheader is].
+        * Join the lines in `text_split` between where the line is the string that is the same as the string that has the index value of one plus `iterstart` and `iterend` (This is the all of the content strings that are under the current subheader). Assgin this string value to `content` variable.
+        * Append the `content` value to along with its associated subheader name to `parse_dict` dictionary.
+6. Finally return `parse_dict`
+
+#### Result:
+The result is the python dictionary of length `n` that has represent a single document which consists of `n` subheaders. The dictionary consists of subheader names and its associated content. Here is a diagram of resulting dictionary.
+![Dictionary](https://github.com/takucnoel-endo/Images/blob/main/Screen%20Shot%202022-04-14%20at%204.46.13%20PM.png)
 
 #### Code: 
 ```python
@@ -113,6 +123,26 @@ def ParseDesc(text, parser):
 ```
 
 ## Main Procedures
+#### Description: 
+This part of the program will bring together all of the functions defined above, and creates a final output: a dataframe of all documents parsed by its subheaders into columns.
+
+#### Procedures:
+1. Using the text extraction function `DocToCorpus` defined, create a dataframe of raw text along with its document identification number. Assign output to `corpus` variable.
+2. Define the list of subheaders to be used to parse the raw text. Assign to `parse_list` variable.
+3. Create a empty list `doc_list` to store all of the dictionary of parsed content and thier subheaders.
+4. Use for-loop to iterate through all of the rows in corpus (in other words, every document) and do the following for every iteration.
+    * Print percent of document iterated to track progress of the loop.
+    * Apply `ParseDesc()` function defined to get the dictionary that contains all subheaders and its corresponding subheaders.Append the function output to `doc_list`. 
+5. Create an empty dataframe `data` to append and store parsed information.
+6. Use for-loop to iterate on every element in `doc_list` and for every iteration, append the parsed data to dataframe.
+7. Define output directory.
+8. Export resulting dataset to the defined directory.
+
+#### Result:
+The result of this procedure is an excel file that has been stored in the local directory that the user defined. The preview of the excel file is as follows.
+
+![Dictionary](https://github.com/takucnoel-endo/Images/blob/main/Screen%20Shot%202022-04-14%20at%205.04.57%20PM.png)
+
 ```python
 #Access each files in directory and create a corpus.
 corpus=DocToCorpus(indir='[input directory]/*.docx')
